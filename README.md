@@ -1,7 +1,11 @@
 # Prometheus
 
-![cover](/src/assets/logo.png)
+<div align="center">
 
-Open source EVM wallets via [Porto](https://porto.sh)
+  ![cover](/src/assets/logo.png)
 
-Coming soon
+  Open source EVM wallets via [Porto](https://porto.sh)
+
+  Coming soon
+
+</div>
