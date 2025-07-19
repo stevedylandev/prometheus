@@ -6,7 +6,7 @@ import logo from "../assets/logo.png";
 interface BalanceDisplayProps {
 	balances: ReadonlyArray<AssetWithBalance>;
 	isLoading: boolean;
-	address: string;
+	address: `0x${string}` | undefined;
 }
 
 export function BalanceDisplay({

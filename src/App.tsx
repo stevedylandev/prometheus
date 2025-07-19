@@ -1,16 +1,22 @@
 import logo from "./assets/logo.png";
 import { Button } from "./components/ui/button";
-import { BalanceDisplay } from "./components/balance-display";
+import { Nav, type NavView } from "./components/nav";
+import { HomeView } from "./components/views/home-view";
+import { SendView } from "./components/views/send-view";
+import { RefreshView } from "./components/views/refresh-view";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useReadBalances } from "./hooks/useReadBalances";
+import { useState } from "react";
 
 function App() {
+	const [currentView, setCurrentView] = useState<NavView>("home");
 	const account = useAccount();
 	const { disconnect } = useDisconnect();
 	const {
 		data: balnaceData,
 		isLoading,
 		isPending,
+		refetch,
 	} = useReadBalances({
 		address: account.address,
 		chainId: 84532,
@@ -20,6 +26,40 @@ function App() {
 	const connector = connectors.find(
 		(connector) => connector.id === "xyz.ithaca.porto",
 	)!;
+
+	const handleRefresh = () => {
+		refetch();
+	};
+
+	const renderCurrentView = () => {
+		switch (currentView) {
+			case "home":
+				return (
+					<HomeView
+						balances={balnaceData || []}
+						isLoading={isLoading || isPending}
+						address={account.address}
+					/>
+				);
+			case "send":
+				return <SendView />;
+			case "refresh":
+				return (
+					<RefreshView
+						onRefresh={handleRefresh}
+						isLoading={isLoading || isPending}
+					/>
+				);
+			default:
+				return (
+					<HomeView
+						balances={balnaceData || []}
+						isLoading={isLoading || isPending}
+						address={account.address}
+					/>
+				);
+		}
+	};
 
 	return (
 		<main className="min-h-screen flex flex-col items-center justify-center">
@@ -37,11 +77,8 @@ function App() {
 							</Button>
 						</div>
 						<div className="w-full">
-							<BalanceDisplay
-								balances={balnaceData || []}
-								isLoading={isLoading || isPending}
-								address={account.address}
-							/>
+							{renderCurrentView()}
+							<Nav currentView={currentView} onViewChange={setCurrentView} />
 						</div>
 					</div>
 				</div>

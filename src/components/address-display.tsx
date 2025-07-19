@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Cuer } from "cuer";
 
 interface AddressDisplayProps {
-	address: string;
+	address: `0x${string}` | undefined;
 	className?: string;
 }
 
@@ -13,6 +13,9 @@ export function AddressDisplay({ address, className }: AddressDisplayProps) {
 
 	const copyToClipboard = async () => {
 		try {
+			if (!address) {
+				return;
+			}
 			await navigator.clipboard.writeText(address);
 			console.log(copied);
 			setCopied(true);
