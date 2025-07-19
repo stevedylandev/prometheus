@@ -6,9 +6,9 @@ const exp2Address = "0x62a9d6DE963a5590f6fbA5119e937F167677bfE7";
 
 export const CORS_DESTROYER_URL = "https://cors.porto.workers.dev";
 
-export function urlWithCorsBypass(url: string) {
-	return `${CORS_DESTROYER_URL}?url=${url}`;
-}
+// export function urlWithCorsBypass(url: string) {
+// 	return `${CORS_DESTROYER_URL}?url=${url}`;
+// }
 
 export const ethAsset = {
 	address: "0x0000000000000000000000000000000000000000",

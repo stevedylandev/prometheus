@@ -1,12 +1,18 @@
 import type { AssetWithBalance } from "@/lib/types";
 import { useTokenPrices } from "@/hooks/useTokenPrices";
+import { AddressDisplay } from "./address-display";
 
 interface BalanceDisplayProps {
 	balances: ReadonlyArray<AssetWithBalance>;
 	isLoading: boolean;
+	address: string;
 }
 
-export function BalanceDisplay({ balances, isLoading }: BalanceDisplayProps) {
+export function BalanceDisplay({
+	balances,
+	isLoading,
+	address,
+}: BalanceDisplayProps) {
 	const { getPriceForAsset, isLoading: isPricesLoading } =
 		useTokenPrices(balances);
 
@@ -27,12 +33,12 @@ export function BalanceDisplay({ balances, isLoading }: BalanceDisplayProps) {
 	) => {
 		const tokenAmount = Number(balance) / 10 ** decimals;
 		const price = getPriceForAsset(asset);
-		
+
 		// If price is null, we can't calculate the dollar value
 		if (price === null) {
 			return 0;
 		}
-		
+
 		return tokenAmount * price;
 	};
 
@@ -50,8 +56,12 @@ export function BalanceDisplay({ balances, isLoading }: BalanceDisplayProps) {
 	return (
 		<div className="w-full flex flex-col gap-4">
 			{/* Total Balance Section */}
-			<div className="flex justify-center items-center p-4 bg-zinc-800 rounded-xl">
-				<div className="text-2xl font-bold">${totalBalance.toFixed(2)}</div>
+			<div className="flex justify-between">
+				<div className="flex flex-col">
+					<p className="text-sm opacity-70">Your Account</p>
+					<p className="text-xl font-semibold">${totalBalance.toFixed(2)}</p>
+				</div>
+				<AddressDisplay address={address} />
 			</div>
 
 			{/* Individual Token List */}

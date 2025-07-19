@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { urlWithCorsBypass } from "../lib/constants";
+//import { urlWithCorsBypass } from "../lib/constants";
 import type { AssetWithBalance } from "@/lib/types";
 
 // Define the CoinGecko API response type
@@ -25,7 +25,7 @@ export function useTokenPrices(assets: ReadonlyArray<AssetWithBalance> = []) {
 			const idsParam = coingeckoIds.join(",");
 			const url = `https://api.coingecko.com/api/v3/simple/price?ids=${idsParam}&vs_currencies=usd`;
 
-			const response = await fetch(urlWithCorsBypass(url));
+			const response = await fetch(url);
 			if (!response.ok) {
 				throw new Error(`Failed to fetch prices: ${response.statusText}`);
 			}

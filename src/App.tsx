@@ -3,6 +3,7 @@ import { Button } from "./components/ui/button";
 import { BalanceDisplay } from "./components/ui/balance-display";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useReadBalances } from "./hooks/useReadBalances";
+import { AddressDisplay } from "./components/ui/address-display";
 
 function App() {
 	const account = useAccount();
@@ -26,9 +27,13 @@ function App() {
 			{account.address ? (
 				<div className="w-full max-w-sm px-4 mx-auto">
 					<div className="flex flex-col gap-4">
-						<div className="flex justify-between items-center mt-2">
-							{account.address.slice(0, 6)}...{account.address.slice(-4)}
-							<Button type="button" onClick={() => disconnect()}>
+						<div className="flex justify-end items-center mt-2">
+							<Button
+								variant="destructive"
+								type="button"
+								className="cursor-pointer text-xs h-6"
+								onClick={() => disconnect()}
+							>
 								Sign out
 							</Button>
 						</div>
@@ -36,6 +41,7 @@ function App() {
 							<BalanceDisplay
 								balances={balnaceData || []}
 								isLoading={isLoading || isPending}
+								address={account.address}
 							/>
 						</div>
 					</div>

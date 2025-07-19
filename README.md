@@ -12,7 +12,7 @@
 
 ## To-Do
 - [x] Total Balance
-- [ ] Copy Address
+- [x] Copy Address
 - [ ] Asset Breakdown
 - [ ] Send Assets
 - [ ] Swap Assets
