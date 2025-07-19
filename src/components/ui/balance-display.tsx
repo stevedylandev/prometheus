@@ -98,7 +98,7 @@ export function BalanceDisplay({
 								</div>
 								<div className="text-sm opacity-70">
 									{getPriceForAsset(asset) === null ? (
-										<span className="text-yellow-500">Price unavailable</span>
+										<span>$0.00</span>
 									) : (
 										`$${calculateDollarValue(
 											asset.balance,

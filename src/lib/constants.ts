@@ -4,12 +4,6 @@ import { Chains } from "porto";
 const exp1Address = "0x29F45fc3eD1d0ffaFb5e2af9Cc6C3AB1555cd5a2";
 const exp2Address = "0x62a9d6DE963a5590f6fbA5119e937F167677bfE7";
 
-export const CORS_DESTROYER_URL = "https://cors.porto.workers.dev";
-
-// export function urlWithCorsBypass(url: string) {
-// 	return `${CORS_DESTROYER_URL}?url=${url}`;
-// }
-
 export const ethAsset = {
 	address: "0x0000000000000000000000000000000000000000",
 	decimals: 18,
@@ -63,14 +57,6 @@ export const defaultAssets: Record<
 			logo: "/icons/usdc.svg",
 			name: "USD Coin",
 			symbol: "USDC",
-		},
-		{
-			address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
-			coingeckoId: "coinbase-wrapped-btc",
-			decimals: 8,
-			logo: "/icons/cbbtc.png",
-			name: "Coinbase Wrapped BTC",
-			symbol: "CBBTC",
 		},
 	],
 };

@@ -19,21 +19,27 @@ export function useReadBalances({
 }) {
 	const account = useAccount();
 	const accountAddress = address ?? account.address;
-	
+
 	// Fetch dynamic token list
 	const { data: tokenList, isLoading: isLoadingTokens } = useTokenList({
 		address: accountAddress,
 		chainId,
 	});
-	
+
 	// Filter out ETH (zero address) for ERC20 contract calls
-	const assets = tokenList?.filter(
-		(asset) => asset.address !== "0x0000000000000000000000000000000000000000",
-	) ?? [];
+	const assets =
+		tokenList?.filter(
+			(asset) => asset.address !== "0x0000000000000000000000000000000000000000",
+		) ?? [];
 
 	const { data: ethBalance } = useBalance({ address: accountAddress, chainId });
 
-	const { data, isLoading: isLoadingBalances, isPending, refetch } = useReadContracts({
+	const {
+		data,
+		isLoading: isLoadingBalances,
+		isPending,
+		refetch,
+	} = useReadContracts({
 		contracts: assets.map((asset) => ({
 			abi: erc20Abi,
 			address: asset.address,
@@ -43,7 +49,7 @@ export function useReadBalances({
 		query: {
 			enabled: assets.length > 0 && Boolean(accountAddress),
 			select: (data) => {
-				const result = data.map((datum, index) => {
+				const tokenResults = data.map((datum, index) => {
 					return {
 						balance:
 							typeof datum.result === "bigint"
@@ -53,10 +59,22 @@ export function useReadBalances({
 					};
 				});
 
-				// Add ETH as the first token
-				result.unshift({ balance: ethBalance?.value ?? 0n, ...ethAsset });
+				// Create array of all assets
+				const allAssets = [];
 
-				return result as ReadonlyArray<AssetWithBalance>;
+				// Only add ETH if balance is greater than zero
+				const ethValue = ethBalance?.value ?? 0n;
+				if (ethValue > 0n) {
+					allAssets.push({ balance: ethValue, ...ethAsset });
+				}
+
+				// Add non-zero ERC20 tokens
+				const nonZeroTokens = tokenResults.filter(
+					(asset) => asset.balance > 0n,
+				);
+				allAssets.push(...nonZeroTokens);
+
+				return allAssets as ReadonlyArray<AssetWithBalance>;
 			},
 		},
 	});
