@@ -1,5 +1,4 @@
-export type AssetWithBalance = {
-	balance: bigint;
+export type Asset = {
 	logo: string;
 	symbol: string;
 	name: string;
@@ -7,4 +6,8 @@ export type AssetWithBalance = {
 	decimals?: number;
 	price?: number;
 	coingeckoId?: string;
+};
+
+export type AssetWithBalance = Asset & {
+	balance: bigint;
 };
