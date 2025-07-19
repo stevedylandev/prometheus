@@ -1,6 +1,6 @@
 {
-  "siteId": "4da8bc1f-0715-4349-917b-0ee6ed144dee",
-  "domain": "prometheus-dev",
+  "siteId": "3fa27169-fc31-46fc-8c4d-7d0378ccda71",
+  "domain": "prometheus",
   "buildCommand": "bun run build",
   "buildDir": "dist"
 }

@@ -27,9 +27,21 @@
 
     <meta name="theme-color" content="#121113" />
 
+    <meta name='fc:frame' content='{"version":"next","imageUrl":"https://prometheus.tools/image.png","aspectRatio":"3:2","button":{"title":"Explore","action":{"type":"launch_frame","name":"Explore","url":"https://prometheus.tools","splashImageUrl":"https://prometheus.tools/splash.png","splashBackgroundColor":"#121113"}}}' />
+
   </head>
   <body>
     <div id="root"></div>
+    <script type="module">
+      import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
+      window.onload = async () => {
+        try {
+          await sdk.actions.ready();
+        } catch (error) {
+          console.error(error);
+        }
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

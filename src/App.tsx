@@ -1,7 +1,11 @@
 import logo from "./assets/logo.png";
 import { Button } from "./components/ui/button";
 import { BalanceDisplay } from "./components/ui/balance-display";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import {
+	useAccount,
+	//useConnect,
+	useDisconnect,
+} from "wagmi";
 import { useReadBalances } from "./hooks/useReadBalances";
 
 function App() {
@@ -16,10 +20,10 @@ function App() {
 		chainId: 84532,
 	});
 
-	const { connectors, connect } = useConnect();
-	const connector = connectors.find(
-		(connector) => connector.id === "xyz.ithaca.porto",
-	)!;
+	//const { connectors, connect } = useConnect();
+	// const connector = connectors.find(
+	// 	(connector) => connector.id === "xyz.ithaca.porto",
+	// )!;
 
 	return (
 		<main className="min-h-screen flex flex-col items-center justify-center">
@@ -50,7 +54,7 @@ function App() {
 					<img src={logo} alt="promethus logo" />
 					<h1 className="text-4xl">Prometheus</h1>
 					<h3>Open Source EVM Wallets</h3>
-					<Button onClick={() => connect({ connector })}>Sign in</Button>
+					<Button disabled>Coming Soon</Button>
 				</div>
 			)}
 		</main>
