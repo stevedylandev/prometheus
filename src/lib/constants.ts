@@ -38,6 +38,7 @@ export const defaultAssets: Record<
 			logo: "/icons/eth.svg",
 			name: "Ethereum",
 			symbol: "ETH",
+			price: 3500, // Current ETH price in USD
 		},
 		{
 			address: exp1Address,

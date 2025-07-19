@@ -1,5 +1,6 @@
 import logo from "./assets/logo.png";
 import { Button } from "./components/ui/button";
+import { BalanceDisplay } from "./components/ui/balance-display";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useReadBalances } from "./hooks/useReadBalances";
 
@@ -10,7 +11,6 @@ function App() {
 		data: balnaceData,
 		isLoading,
 		isPending,
-		refetch,
 	} = useReadBalances({
 		address: account.address,
 		chainId: 84532,
@@ -23,47 +23,31 @@ function App() {
 
 	return (
 		<main className="min-h-screen flex flex-col items-center justify-center">
-			<div className="max-w-lg flex flex-col items-center gap-4">
-				{account.address ? (
-					<div className="flex flex-col items-center justify-center gap-4">
-						<div>
+			{account.address ? (
+				<div className="w-full max-w-sm px-4 mx-auto">
+					<div className="flex flex-col gap-4">
+						<div className="flex justify-between items-center mt-2">
 							{account.address.slice(0, 6)}...{account.address.slice(-4)}
-						</div>
-						<div className="flex flex-col items-center gap-2">
-							<h3 className="text-lg font-semibold">Balance Details</h3>
-							{isLoading || isPending ? (
-								<div>Loading balances...</div>
-							) : balnaceData ? (
-								<div className="text-center">
-									<pre className="text-sm p-2 rounded">
-										{JSON.stringify(
-											balnaceData,
-											(key, value) =>
-												typeof value === "bigint" ? value.toString() : value,
-											2,
-										)}
-									</pre>
-								</div>
-							) : (
-								<div>No balance data available</div>
-							)}
-							<Button type="button" onClick={() => refetch()}>
-								Refresh Balances
+							<Button type="button" onClick={() => disconnect()}>
+								Sign out
 							</Button>
 						</div>
-						<Button type="button" onClick={() => disconnect()}>
-							Sign out
-						</Button>
+						<div className="w-full">
+							<BalanceDisplay
+								balances={balnaceData || []}
+								isLoading={isLoading || isPending}
+							/>
+						</div>
 					</div>
-				) : (
-					<>
-						<img src={logo} alt="promethus logo" />
-						<h1 className="text-4xl">Prometheus</h1>
-						<h3>Open Source EVM Wallets</h3>
-						<Button onClick={() => connect({ connector })}>Sign in</Button>
-					</>
-				)}
-			</div>
+				</div>
+			) : (
+				<div className="max-w-lg flex flex-col items-center gap-4">
+					<img src={logo} alt="promethus logo" />
+					<h1 className="text-4xl">Prometheus</h1>
+					<h3>Open Source EVM Wallets</h3>
+					<Button onClick={() => connect({ connector })}>Sign in</Button>
+				</div>
+			)}
 		</main>
 	);
 }

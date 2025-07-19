@@ -6,7 +6,7 @@ import {
 	useReadContracts,
 	useWatchBlockNumber,
 } from "wagmi";
-
+import type { AssetWithBalance } from "@/lib/types";
 import { defaultAssets, ethAsset } from "../lib/constants";
 
 export function useReadBalances({
@@ -45,13 +45,7 @@ export function useReadBalances({
 
 				result.unshift({ balance: ethBalance?.value ?? 0n, ...ethAsset });
 
-				return result as ReadonlyArray<{
-					balance: bigint;
-					logo: string;
-					symbol: string;
-					name: string;
-					address: string;
-				}>;
+				return result as ReadonlyArray<AssetWithBalance>;
 			},
 		},
 	});

@@ -9,3 +9,12 @@
   Coming soon
 
 </div>
+
+## To-Do
+- [x] Total Balance
+- [ ] Copy Address
+- [ ] Asset Breakdown
+- [ ] Send Assets
+- [ ] Swap Assets
+- [ ] Transaction History
+- [ ] Onboard?
