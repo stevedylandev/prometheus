@@ -1,6 +1,6 @@
 import logo from "./assets/logo.png";
 import { Button } from "./components/ui/button";
-import { BalanceDisplay } from "./components/ui/balance-display";
+import { BalanceDisplay } from "./components/balance-display";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useReadBalances } from "./hooks/useReadBalances";
 

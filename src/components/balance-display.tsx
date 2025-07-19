@@ -1,7 +1,7 @@
 import type { AssetWithBalance } from "@/lib/types";
 import { useTokenPrices } from "@/hooks/useTokenPrices";
 import { AddressDisplay } from "./address-display";
-import logo from "../../assets/logo.png";
+import logo from "../assets/logo.png";
 
 interface BalanceDisplayProps {
 	balances: ReadonlyArray<AssetWithBalance>;
