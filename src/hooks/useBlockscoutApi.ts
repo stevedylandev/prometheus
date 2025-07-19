@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Address } from "ox";
 import * as React from "react";
 import { useAccount, useWatchBlockNumber } from "wagmi";
-import { urlWithCorsBypass } from "../lib/constants";
 import { useReadBalances } from "./useReadBalances";
 
 export function useAddressTransfers({
@@ -25,7 +24,7 @@ export function useAddressTransfers({
 		queryFn: async () => {
 			const apiEndpoint = "https://base-sepolia.blockscout.com/api/v2";
 			const url = `${apiEndpoint}/addresses/${userAddress}/token-transfers`;
-			const response = await fetch(urlWithCorsBypass(url));
+			const response = await fetch(url);
 
 			const data = (await response.json()) as {
 				items: Array<TokenTransfer>;

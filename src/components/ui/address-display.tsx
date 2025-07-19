@@ -1,6 +1,5 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "./button";
 import { toast } from "sonner";
 import { Cuer } from "cuer";
 
@@ -15,6 +14,7 @@ export function AddressDisplay({ address, className }: AddressDisplayProps) {
 	const copyToClipboard = async () => {
 		try {
 			await navigator.clipboard.writeText(address);
+			console.log(copied);
 			setCopied(true);
 			toast("Address Copied!");
 			setTimeout(() => setCopied(false), 2000);
@@ -25,6 +25,7 @@ export function AddressDisplay({ address, className }: AddressDisplayProps) {
 
 	return (
 		<button
+			type="button"
 			className={cn(
 				"flex w-[150px] items-center justify-center gap-3 hover:cursor-pointer!",
 				className,
