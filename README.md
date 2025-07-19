@@ -13,8 +13,8 @@
 ## To-Do
 - [x] Total Balance
 - [x] Copy Address
-- [ ] Asset Breakdown
+- [x] Asset Breakdown
 - [ ] Send Assets
 - [ ] Swap Assets
 - [ ] Transaction History
-- [ ] Onboard?
+- [ ] Onramp?
