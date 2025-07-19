@@ -1,6 +1,7 @@
 import type { AssetWithBalance } from "@/lib/types";
 import { useTokenPrices } from "@/hooks/useTokenPrices";
 import { AddressDisplay } from "./address-display";
+import logo from "../../assets/logo.png";
 
 interface BalanceDisplayProps {
 	balances: ReadonlyArray<AssetWithBalance>;
@@ -57,7 +58,8 @@ export function BalanceDisplay({
 		<div className="w-full flex flex-col gap-4">
 			{/* Total Balance Section */}
 			<div className="flex justify-between">
-				<div className="flex flex-col">
+				<div className="flex flex-col gap-2">
+					<img src={logo} alt="promethus logo" className="max-w-[50px]" />
 					<p className="text-sm opacity-70">Your Account</p>
 					<p className="text-xl font-semibold">${totalBalance.toFixed(2)}</p>
 				</div>
