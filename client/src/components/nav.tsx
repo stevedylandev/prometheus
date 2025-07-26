@@ -1,7 +1,7 @@
-import { SendHorizonalIcon, HomeIcon, RefreshCcwIcon } from "lucide-react";
+import { SendHorizonalIcon, HomeIcon, ArrowUpDownIcon } from "lucide-react";
 import { Button } from "./ui/button";
 
-export type NavView = "home" | "send" | "refresh";
+export type NavView = "home" | "send" | "swap";
 
 interface NavProps {
 	currentView: NavView;
@@ -28,12 +28,12 @@ export function Nav({ currentView, onViewChange }: NavProps) {
 				<span className="text-xs">Send</span>
 			</Button>
 			<Button
-				variant={currentView === "refresh" ? "default" : "ghost"}
+				variant={currentView === "swap" ? "default" : "ghost"}
 				className="flex-1 flex flex-col items-center gap-1 h-auto py-2"
-				onClick={() => onViewChange("refresh")}
+				onClick={() => onViewChange("swap")}
 			>
-				<RefreshCcwIcon size={20} />
-				<span className="text-xs">Refresh</span>
+				<ArrowUpDownIcon size={20} />
+				<span className="text-xs">Swap</span>
 			</Button>
 		</div>
 	);

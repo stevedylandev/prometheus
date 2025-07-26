@@ -3,7 +3,7 @@ import { Button } from "./components/ui/button";
 import { Nav, type NavView } from "./components/nav";
 import { HomeView } from "./components/views/home-view";
 import { SendView } from "./components/views/send-view";
-import { RefreshView } from "./components/views/refresh-view";
+import { SwapView } from "./components/views/swap-view";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useReadBalances } from "./hooks/useReadBalances";
 import { useState } from "react";
@@ -31,6 +31,11 @@ function App() {
 		refetch();
 	};
 
+	const handleSwap = async (sellToken: string, buyToken: string, sellAmount: string) => {
+		console.log('Swap:', { sellToken, buyToken, sellAmount });
+		// TODO: Implement swap logic
+	};
+
 	const renderCurrentView = () => {
 		switch (currentView) {
 			case "home":
@@ -43,10 +48,10 @@ function App() {
 				);
 			case "send":
 				return <SendView />;
-			case "refresh":
+			case "swap":
 				return (
-					<RefreshView
-						onRefresh={handleRefresh}
+					<SwapView
+						onSwap={handleSwap}
 						isLoading={isLoading || isPending}
 					/>
 				);
