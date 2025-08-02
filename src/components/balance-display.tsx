@@ -1,6 +1,11 @@
+import { useState } from "react";
 import type { AssetWithBalance } from "@/lib/types";
 import { useTokenPrices } from "@/hooks/useTokenPrices";
+import { useTransaction } from "@/hooks/useTransaction";
 import { AddressDisplay } from "./address-display";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import logo from "../assets/logo.png";
 
 interface BalanceDisplayProps {
@@ -16,6 +21,12 @@ export function BalanceDisplay({
 }: BalanceDisplayProps) {
 	const { getPriceForAsset, isLoading: isPricesLoading } =
 		useTokenPrices(balances);
+	const { sendEth, sendToken, isPending } = useTransaction();
+	const [sendAmount, setSendAmount] = useState("");
+	const [recipient, setRecipient] = useState("");
+	const [selectedAsset, setSelectedAsset] = useState<AssetWithBalance | null>(
+		null,
+	);
 
 	if (isLoading || isPricesLoading) {
 		return <div className="w-full text-center py-4">Loading balances...</div>;
@@ -54,6 +65,31 @@ export function BalanceDisplay({
 		return (Number(balance) / 10 ** decimals).toFixed(4);
 	};
 
+	const handleSend = async () => {
+		if (!selectedAsset || !recipient || !sendAmount) return;
+
+		try {
+			if (
+				selectedAsset.address === "0x0000000000000000000000000000000000000000"
+			) {
+				await sendEth({ to: recipient as `0x${string}`, amount: sendAmount });
+			} else {
+				await sendToken({
+					to: recipient as `0x${string}`,
+					amount: sendAmount,
+					tokenAddress: selectedAsset.address as `0x${string}`,
+					decimals: selectedAsset.decimals || 18,
+				});
+			}
+
+			setSendAmount("");
+			setRecipient("");
+			setSelectedAsset(null);
+		} catch (error) {
+			console.error("Transaction failed:", error);
+		}
+	};
+
 	return (
 		<div className="w-full flex flex-col gap-4">
 			{/* Total Balance Section */}
@@ -64,6 +100,58 @@ export function BalanceDisplay({
 					<p className="text-xl font-semibold">${totalBalance.toFixed(2)}</p>
 				</div>
 				<AddressDisplay address={address} />
+			</div>
+
+			{/* Send Transaction Section */}
+			<div className="bg-zinc-900 rounded-xl p-4 space-y-3">
+				<h3 className="text-lg font-semibold">Send Transaction</h3>
+
+				<div className="space-y-2">
+					<Label>Select Token</Label>
+					<select
+						value={selectedAsset?.symbol || ""}
+						onChange={(e) => {
+							const asset = balances.find((b) => b.symbol === e.target.value);
+							setSelectedAsset(asset || null);
+						}}
+						className="w-full p-2 bg-zinc-800 rounded border-zinc-700 text-white"
+					>
+						<option value="">Choose token...</option>
+						{balances.map((asset) => (
+							<option key={asset.symbol} value={asset.symbol}>
+								{asset.symbol} (
+								{formatBalance(asset.balance, asset.decimals || 18)})
+							</option>
+						))}
+					</select>
+				</div>
+
+				<div className="space-y-2">
+					<Label>Recipient Address</Label>
+					<Input
+						type="text"
+						value={recipient}
+						onChange={(e) => setRecipient(e.target.value)}
+						placeholder="0x..."
+					/>
+				</div>
+
+				<div className="space-y-2">
+					<Label>Amount</Label>
+					<Input
+						value={sendAmount}
+						onChange={(e) => setSendAmount(e.target.value)}
+						placeholder="0.0"
+					/>
+				</div>
+
+				<Button
+					onClick={handleSend}
+					disabled={!selectedAsset || !recipient || !sendAmount || isPending}
+					className="w-full"
+				>
+					{isPending ? "Sending..." : "Send Transaction"}
+				</Button>
 			</div>
 
 			{/* Individual Token List */}
