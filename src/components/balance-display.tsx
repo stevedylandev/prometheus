@@ -6,6 +6,7 @@ import { AddressDisplay } from "./address-display";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { SendHorizontalIcon } from "lucide-react";
 import logo from "../assets/logo.png";
 
@@ -119,28 +120,13 @@ export function BalanceDisplay({
 			</div>
 
 			{/* Send Modal */}
-			{showSendModal && sendModalAsset && (
-				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20">
-					<div className="bg-zinc-900 rounded-xl p-6 w-full max-w-md mx-4 animate-in slide-in-from-top-4 duration-300">
-						<div className="flex justify-between items-center mb-4">
-							<h3 className="text-lg font-semibold">
-								Send {sendModalAsset.symbol}
-							</h3>
-							<button
-								onClick={closeSendModal}
-								className="text-gray-400 hover:text-white transition-colors"
-							>
-								<svg
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="currentColor"
-								>
-									<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-								</svg>
-							</button>
-						</div>
+			<Dialog open={showSendModal} onOpenChange={setShowSendModal}>
+				<DialogContent className="sm:w-[400px] bg-zinc-900 border-zinc-700 mx-2">
+					<DialogHeader>
+						<DialogTitle>Send {sendModalAsset?.symbol}</DialogTitle>
+					</DialogHeader>
 
+					{sendModalAsset && (
 						<div className="space-y-4">
 							<div className="flex justify-between items-center p-3 bg-zinc-800 rounded-lg">
 								<span className="text-sm opacity-70">Token</span>
@@ -173,8 +159,12 @@ export function BalanceDisplay({
 									type="number"
 									value={sendAmount}
 									onChange={(e) => setSendAmount(e.target.value)}
-									placeholder="0.0"
+									placeholder="0.00"
 									step="any"
+									style={{
+										WebkitAppearance: "none",
+										MozAppearance: "textfield",
+									}}
 								/>
 							</div>
 
@@ -195,9 +185,9 @@ export function BalanceDisplay({
 								</Button>
 							</div>
 						</div>
-					</div>
-				</div>
-			)}
+					)}
+				</DialogContent>
+			</Dialog>
 
 			{/* Individual Token List */}
 			<div className="space-y-2">
