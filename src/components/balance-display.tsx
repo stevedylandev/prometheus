@@ -6,6 +6,7 @@ import { AddressDisplay } from "./address-display";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { SendHorizontalIcon } from "lucide-react";
 import logo from "../assets/logo.png";
 
 interface BalanceDisplayProps {
@@ -24,7 +25,9 @@ export function BalanceDisplay({
 	const { sendEth, sendToken, isPending } = useTransaction();
 	const [sendAmount, setSendAmount] = useState("");
 	const [recipient, setRecipient] = useState("");
-	const [selectedAsset, setSelectedAsset] = useState<AssetWithBalance | null>(
+	const [hoveredAsset, setHoveredAsset] = useState<string | null>(null);
+	const [showSendModal, setShowSendModal] = useState(false);
+	const [sendModalAsset, setSendModalAsset] = useState<AssetWithBalance | null>(
 		null,
 	);
 
@@ -32,11 +35,11 @@ export function BalanceDisplay({
 		return <div className="w-full text-center py-4">Loading balances...</div>;
 	}
 
-	if (!balances || balances.length === 0) {
-		return (
-			<div className="w-full text-center py-4">No balance data available</div>
-		);
-	}
+	// if (!balances || balances.length === 0) {
+	// 	return (
+	// 		<div className="w-full text-center py-4">No balance data available</div>
+	// 	);
+	// }
 
 	const calculateDollarValue = (
 		balance: bigint,
@@ -65,29 +68,42 @@ export function BalanceDisplay({
 		return (Number(balance) / 10 ** decimals).toFixed(4);
 	};
 
+	const handleSendClick = (asset: AssetWithBalance) => {
+		setSendModalAsset(asset);
+		setShowSendModal(true);
+	};
+
 	const handleSend = async () => {
-		if (!selectedAsset || !recipient || !sendAmount) return;
+		if (!sendModalAsset || !recipient || !sendAmount) return;
 
 		try {
 			if (
-				selectedAsset.address === "0x0000000000000000000000000000000000000000"
+				sendModalAsset.address === "0x0000000000000000000000000000000000000000"
 			) {
 				await sendEth({ to: recipient as `0x${string}`, amount: sendAmount });
 			} else {
 				await sendToken({
 					to: recipient as `0x${string}`,
 					amount: sendAmount,
-					tokenAddress: selectedAsset.address as `0x${string}`,
-					decimals: selectedAsset.decimals || 18,
+					tokenAddress: sendModalAsset.address as `0x${string}`,
+					decimals: sendModalAsset.decimals || 18,
 				});
 			}
 
 			setSendAmount("");
 			setRecipient("");
-			setSelectedAsset(null);
+			setSendModalAsset(null);
+			setShowSendModal(false);
 		} catch (error) {
 			console.error("Transaction failed:", error);
 		}
+	};
+
+	const closeSendModal = () => {
+		setShowSendModal(false);
+		setSendModalAsset(null);
+		setSendAmount("");
+		setRecipient("");
 	};
 
 	return (
@@ -102,57 +118,86 @@ export function BalanceDisplay({
 				<AddressDisplay address={address} />
 			</div>
 
-			{/* Send Transaction Section */}
-			<div className="bg-zinc-900 rounded-xl p-4 space-y-3">
-				<h3 className="text-lg font-semibold">Send Transaction</h3>
+			{/* Send Modal */}
+			{showSendModal && sendModalAsset && (
+				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20">
+					<div className="bg-zinc-900 rounded-xl p-6 w-full max-w-md mx-4 animate-in slide-in-from-top-4 duration-300">
+						<div className="flex justify-between items-center mb-4">
+							<h3 className="text-lg font-semibold">
+								Send {sendModalAsset.symbol}
+							</h3>
+							<button
+								onClick={closeSendModal}
+								className="text-gray-400 hover:text-white transition-colors"
+							>
+								<svg
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="currentColor"
+								>
+									<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+								</svg>
+							</button>
+						</div>
 
-				<div className="space-y-2">
-					<Label>Select Token</Label>
-					<select
-						value={selectedAsset?.symbol || ""}
-						onChange={(e) => {
-							const asset = balances.find((b) => b.symbol === e.target.value);
-							setSelectedAsset(asset || null);
-						}}
-						className="w-full p-2 bg-zinc-800 rounded border-zinc-700 text-white"
-					>
-						<option value="">Choose token...</option>
-						{balances.map((asset) => (
-							<option key={asset.symbol} value={asset.symbol}>
-								{asset.symbol} (
-								{formatBalance(asset.balance, asset.decimals || 18)})
-							</option>
-						))}
-					</select>
+						<div className="space-y-4">
+							<div className="flex justify-between items-center p-3 bg-zinc-800 rounded-lg">
+								<span className="text-sm opacity-70">Token</span>
+								<div className="text-right">
+									<div className="font-medium">{sendModalAsset.symbol}</div>
+									<div className="text-sm opacity-70">
+										Balance:{" "}
+										{formatBalance(
+											sendModalAsset.balance,
+											sendModalAsset.decimals || 18,
+										)}
+									</div>
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<Label>Recipient Address</Label>
+								<Input
+									type="text"
+									value={recipient}
+									onChange={(e) => setRecipient(e.target.value)}
+									placeholder="0x..."
+									autoFocus
+								/>
+							</div>
+
+							<div className="space-y-2">
+								<Label>Amount</Label>
+								<Input
+									type="number"
+									value={sendAmount}
+									onChange={(e) => setSendAmount(e.target.value)}
+									placeholder="0.0"
+									step="any"
+								/>
+							</div>
+
+							<div className="flex gap-3 pt-2">
+								<Button
+									variant="outline"
+									onClick={closeSendModal}
+									className="flex-1"
+								>
+									Cancel
+								</Button>
+								<Button
+									onClick={handleSend}
+									disabled={!recipient || !sendAmount || isPending}
+									className="flex-1"
+								>
+									{isPending ? "Sending..." : "Send"}
+								</Button>
+							</div>
+						</div>
+					</div>
 				</div>
-
-				<div className="space-y-2">
-					<Label>Recipient Address</Label>
-					<Input
-						type="text"
-						value={recipient}
-						onChange={(e) => setRecipient(e.target.value)}
-						placeholder="0x..."
-					/>
-				</div>
-
-				<div className="space-y-2">
-					<Label>Amount</Label>
-					<Input
-						value={sendAmount}
-						onChange={(e) => setSendAmount(e.target.value)}
-						placeholder="0.0"
-					/>
-				</div>
-
-				<Button
-					onClick={handleSend}
-					disabled={!selectedAsset || !recipient || !sendAmount || isPending}
-					className="w-full"
-				>
-					{isPending ? "Sending..." : "Send Transaction"}
-				</Button>
-			</div>
+			)}
 
 			{/* Individual Token List */}
 			<div className="space-y-2">
@@ -161,42 +206,56 @@ export function BalanceDisplay({
 					.map((asset) => (
 						<div
 							key={asset.symbol}
-							className="flex justify-between items-center p-4 bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-colors"
+							className="relative overflow-hidden bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all duration-300 cursor-pointer group"
+							onMouseEnter={() => setHoveredAsset(asset.symbol)}
+							onMouseLeave={() => setHoveredAsset(null)}
 						>
-							<div className="flex items-center gap-3">
-								{/* {asset.logo && (
-								<div className="w-10 h-10 rounded-full overflow-hidden bg-pink-300 flex items-center justify-center">
-									<img
-										src={asset.logo}
-										alt={asset.symbol}
-										className="w-6 h-6"
-									/>
+							{/* Main balance card */}
+							<div
+								className={`flex justify-between items-center p-4 transition-transform duration-300 ${
+									hoveredAsset === asset.symbol
+										? "-translate-x-16"
+										: "translate-x-0"
+								}`}
+							>
+								<div className="flex items-center gap-3">
+									<div className="flex flex-col">
+										<span className="font-medium">{asset.symbol}</span>
+										{asset.name && (
+											<span className="text-sm opacity-70">{asset.name}</span>
+										)}
+									</div>
 								</div>
-							)} */}
-								<div className="flex flex-col">
-									<span className="font-medium">{asset.symbol}</span>
-									{asset.name && (
-										<span className="text-sm opacity-70">{asset.name}</span>
-									)}
+								<div className="text-right">
+									<div className="font-semibold">
+										{formatBalance(asset.balance, asset.decimals || 18)}
+									</div>
+									<div className="text-sm opacity-70">
+										{getPriceForAsset(asset) === null ? (
+											<span>$0.00</span>
+										) : (
+											`$${calculateDollarValue(
+												asset.balance,
+												asset.decimals || 18,
+												asset,
+											).toFixed(2)}`
+										)}
+									</div>
 								</div>
 							</div>
-							<div className="text-right">
-								<div className="font-semibold">
-									{formatBalance(asset.balance, asset.decimals || 18)}
-								</div>
-								<div className="text-sm opacity-70">
-									{getPriceForAsset(asset) === null ? (
-										<span>$0.00</span>
-									) : (
-										`$${calculateDollarValue(
-											asset.balance,
-											asset.decimals || 18,
-											asset,
-										).toFixed(2)}`
-									)}
-								</div>
-								{/* Add price change indicator here if needed */}
-							</div>
+
+							{/* Send arrow button - appears when card slides */}
+							<button
+								type="button"
+								className={`absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer rounded-full flex items-center justify-center transition-all duration-300 ${
+									hoveredAsset === asset.symbol
+										? "opacity-100 translate-x-0"
+										: "opacity-0 translate-x-4"
+								}`}
+								onClick={() => handleSendClick(asset)}
+							>
+								<SendHorizontalIcon />
+							</button>
 						</div>
 					))}
 			</div>
