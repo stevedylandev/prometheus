@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { AssetWithBalance } from "@/lib/types";
 import { useTokenPrices } from "@/hooks/useTokenPrices";
 import { useTransaction } from "@/hooks/useTransaction";
@@ -7,7 +7,15 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { SendHorizontalIcon } from "lucide-react";
+import {
+	SendHorizontalIcon,
+	LoaderCircleIcon,
+	BadgeCheckIcon,
+	CircleAlertIcon,
+} from "lucide-react";
+import { getEnsAddress } from "@wagmi/core";
+import { config } from "@/lib/config";
+import { mainnet } from "wagmi/chains";
 import logo from "../assets/logo.png";
 
 interface BalanceDisplayProps {
@@ -26,11 +34,54 @@ export function BalanceDisplay({
 	const { sendEth, sendToken, isPending } = useTransaction();
 	const [sendAmount, setSendAmount] = useState("");
 	const [recipient, setRecipient] = useState("");
+	const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
+	const [isResolvingEns, setIsResolvingEns] = useState(false);
+	const [hasAttemptedResolve, setHasAttemptedResolve] = useState(false);
 	const [hoveredAsset, setHoveredAsset] = useState<string | null>(null);
 	const [showSendModal, setShowSendModal] = useState(false);
 	const [sendModalAsset, setSendModalAsset] = useState<AssetWithBalance | null>(
 		null,
 	);
+
+	useEffect(() => {
+		const resolveEnsName = async () => {
+			if (!recipient) {
+				setResolvedAddress(null);
+				setHasAttemptedResolve(false);
+				return;
+			}
+
+			if (recipient.startsWith("0x")) {
+				setResolvedAddress(recipient);
+				setHasAttemptedResolve(false);
+				return;
+			}
+
+			if (recipient.endsWith(".eth")) {
+				setIsResolvingEns(true);
+				setHasAttemptedResolve(false);
+				try {
+					const address = await getEnsAddress(config, {
+						name: recipient,
+						chainId: mainnet.id,
+					});
+					setResolvedAddress(address);
+				} catch (error) {
+					console.error("ENS resolution failed:", error);
+					setResolvedAddress(null);
+				} finally {
+					setIsResolvingEns(false);
+					setHasAttemptedResolve(true);
+				}
+			} else {
+				setResolvedAddress(null);
+				setHasAttemptedResolve(false);
+			}
+		};
+
+		const timeoutId = setTimeout(resolveEnsName, 300);
+		return () => clearTimeout(timeoutId);
+	}, [recipient]);
 
 	if (isLoading || isPricesLoading) {
 		return <div className="w-full text-center py-4">Loading balances...</div>;
@@ -75,16 +126,20 @@ export function BalanceDisplay({
 	};
 
 	const handleSend = async () => {
-		if (!sendModalAsset || !recipient || !sendAmount) return;
+		if (!sendModalAsset || !recipient || !sendAmount || !resolvedAddress)
+			return;
 
 		try {
 			if (
 				sendModalAsset.address === "0x0000000000000000000000000000000000000000"
 			) {
-				await sendEth({ to: recipient as `0x${string}`, amount: sendAmount });
+				await sendEth({
+					to: resolvedAddress as `0x${string}`,
+					amount: sendAmount,
+				});
 			} else {
 				await sendToken({
-					to: recipient as `0x${string}`,
+					to: resolvedAddress as `0x${string}`,
 					amount: sendAmount,
 					tokenAddress: sendModalAsset.address as `0x${string}`,
 					decimals: sendModalAsset.decimals || 18,
@@ -93,6 +148,8 @@ export function BalanceDisplay({
 
 			setSendAmount("");
 			setRecipient("");
+			setResolvedAddress(null);
+			setHasAttemptedResolve(false);
 			setSendModalAsset(null);
 			setShowSendModal(false);
 		} catch (error) {
@@ -105,6 +162,8 @@ export function BalanceDisplay({
 		setSendModalAsset(null);
 		setSendAmount("");
 		setRecipient("");
+		setResolvedAddress(null);
+		setHasAttemptedResolve(false);
 	};
 
 	return (
@@ -144,13 +203,32 @@ export function BalanceDisplay({
 
 							<div className="space-y-2">
 								<Label>Recipient Address</Label>
-								<Input
-									type="text"
-									value={recipient}
-									onChange={(e) => setRecipient(e.target.value)}
-									placeholder="0x..."
-									autoFocus
-								/>
+								<div className="relative">
+									<Input
+										type="text"
+										value={recipient}
+										onChange={(e) => setRecipient(e.target.value)}
+										placeholder="0x... or name.eth"
+										autoFocus
+										className="pr-10"
+									/>
+									<div className="absolute inset-y-0 right-0 flex items-center pr-3">
+										{isResolvingEns && (
+											<LoaderCircleIcon className="h-4 w-4 text-blue-400 animate-spin" />
+										)}
+										{!isResolvingEns &&
+											resolvedAddress &&
+											resolvedAddress !== recipient && (
+												<BadgeCheckIcon className="h-4 w-4 text-blue-400" />
+											)}
+										{!isResolvingEns &&
+											hasAttemptedResolve &&
+											recipient.endsWith(".eth") &&
+											!resolvedAddress && (
+												<CircleAlertIcon className="h-4 w-4 text-red-400" />
+											)}
+									</div>
+								</div>
 							</div>
 
 							<div className="space-y-2">
@@ -178,7 +256,9 @@ export function BalanceDisplay({
 								</Button>
 								<Button
 									onClick={handleSend}
-									disabled={!recipient || !sendAmount || isPending}
+									disabled={
+										!recipient || !sendAmount || !resolvedAddress || isPending
+									}
 									className="flex-1"
 								>
 									{isPending ? "Sending..." : "Send"}
