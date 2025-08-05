@@ -5,8 +5,8 @@ import { isAddressEqual } from "viem";
 
 interface TransactionItemProps {
 	item:
-		| (Transaction & { type: "transaction" })
-		| (TokenTransfer & { type: "token_transfer" });
+		| (Transaction & { itemType: "transaction" })
+		| (TokenTransfer & { itemType: "token_transfer" });
 	address: string;
 	balances: ReadonlyArray<AssetWithBalance>;
 }
@@ -19,52 +19,33 @@ export function TransactionItem({
 	const { getPriceForAsset } = useTokenPrices(balances);
 
 	// Determine if transaction is received or sent based on type
-	let isReceived = false;
-	let isSent = false;
+	const isReceived = isAddressEqual(
+		item.to.hash as `0x${string}`,
+		address as `0x${string}`,
+	);
 
-	if (item.type === "token_transfer") {
-		// For token transfers, check the to/from of the transfer itself
-		isReceived = isAddressEqual(
-			item.to.hash as `0x${string}`,
-			address as `0x${string}`,
-		);
-		isSent = isAddressEqual(
-			item.from.hash as `0x${string}`,
-			address as `0x${string}`,
-		);
-	} else {
-		// For regular transactions, check the to/from of the transaction
-		isReceived = isAddressEqual(
-			item.to.hash as `0x${string}`,
-			address as `0x${string}`,
-		);
-		isSent = isAddressEqual(
-			item.from.hash as `0x${string}`,
-			address as `0x${string}`,
-		);
-	}
-
-	const isAssetTransfer =
-		item.type === "token_transfer" ||
-		(item.type === "transaction" && item.value !== "0");
+	const isAssetTransfer = 
+		item.itemType === "token_transfer" || 
+		(item.itemType === "transaction" && (item as Transaction & { itemType: "transaction" }).value !== "0");
 
 	// Calculate USD value for asset transfers
 	let usdValue = 0;
 	let assetAmount = "";
 	let assetSymbol = "";
 
-	if (item.type === "token_transfer") {
+	if (item.itemType === "token_transfer") {
+		const tokenTransfer = item as TokenTransfer & { itemType: "token_transfer" };
 		const amount =
-			Number(item.total.value) / Math.pow(10, Number(item.total.decimals));
+			Number(tokenTransfer.total.value) / Math.pow(10, Number(tokenTransfer.total.decimals));
 		assetAmount = amount.toFixed(4);
-		assetSymbol = item.token.symbol;
+		assetSymbol = tokenTransfer.token.symbol;
 		// Try to find matching balance to get price
 		const matchingBalance = balances.find(
 			(b) =>
-				b.symbol === item.token.symbol ||
+				b.symbol === tokenTransfer.token.symbol ||
 				isAddressEqual(
 					b.address as `0x${string}`,
-					item.token.address as `0x${string}`,
+					tokenTransfer.token.address as `0x${string}`,
 				),
 		);
 		if (matchingBalance) {
@@ -73,20 +54,23 @@ export function TransactionItem({
 				usdValue = amount * price;
 			}
 		}
-	} else if (item.type === "transaction" && item.value !== "0") {
-		const ethAmount = Number(item.value) / 1e18;
-		assetAmount = ethAmount.toFixed(4);
-		assetSymbol = "ETH";
-		// Try to find ETH balance to get price
-		const ethBalance = balances.find(
-			(b) =>
-				b.symbol === "ETH" ||
-				b.address === "0x0000000000000000000000000000000000000000",
-		);
-		if (ethBalance) {
-			const price = getPriceForAsset(ethBalance);
-			if (price !== null) {
-				usdValue = ethAmount * price;
+	} else if (item.itemType === "transaction") {
+		const transaction = item as Transaction & { itemType: "transaction" };
+		if (transaction.value !== "0") {
+			const ethAmount = Number(transaction.value) / 1e18;
+			assetAmount = ethAmount.toFixed(4);
+			assetSymbol = "ETH";
+			// Try to find ETH balance to get price
+			const ethBalance = balances.find(
+				(b) =>
+					b.symbol === "ETH" ||
+					b.address === "0x0000000000000000000000000000000000000000",
+			);
+			if (ethBalance) {
+				const price = getPriceForAsset(ethBalance);
+				if (price !== null) {
+					usdValue = ethAmount * price;
+				}
 			}
 		}
 	}
@@ -136,14 +120,14 @@ export function TransactionItem({
 						{new Date(item.timestamp).toLocaleTimeString()}
 					</div>
 
-					{item.type === "transaction" &&
-						item.token_transfers &&
-						item.token_transfers.length > 0 && (
+					{item.itemType === "transaction" &&
+						(item as Transaction & { itemType: "transaction" }).token_transfers &&
+						(item as Transaction & { itemType: "transaction" }).token_transfers!.length > 0 && (
 							<div className="mt-3 pt-3 border-t border-zinc-700">
 								<div className="text-xs text-gray-400 mb-2">
 									Token Transfers:
 								</div>
-								{item.token_transfers.slice(0, 3).map((transfer, index) => (
+								{(item as Transaction & { itemType: "transaction" }).token_transfers!.slice(0, 3).map((transfer: any, index: number) => (
 									<div key={index} className="flex justify-between text-xs">
 										<span>{transfer.token.symbol}</span>
 										<span>
@@ -154,9 +138,9 @@ export function TransactionItem({
 										</span>
 									</div>
 								))}
-								{item.token_transfers.length > 3 && (
+								{(item as Transaction & { itemType: "transaction" }).token_transfers!.length > 3 && (
 									<div className="text-xs text-gray-400 mt-1">
-										+{item.token_transfers.length - 3} more transfers
+										+{(item as Transaction & { itemType: "transaction" }).token_transfers!.length - 3} more transfers
 									</div>
 								)}
 							</div>

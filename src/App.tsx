@@ -24,8 +24,8 @@ function App() {
 
 	// Type-safe transaction items
 	const transactions = (transactionsData?.items || []) as ReadonlyArray<
-		| (Transaction & { type: "transaction" })
-		| (TokenTransfer & { type: "token_transfer" })
+		| (Transaction & { itemType: "transaction" })
+		| (TokenTransfer & { itemType: "token_transfer" })
 	>;
 
 	const { connectors, connect } = useConnect();

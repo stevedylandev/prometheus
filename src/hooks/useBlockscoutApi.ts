@@ -37,11 +37,11 @@ export function useAddressTransactions({
 			const allItems = [
 				...transactionsData.items.map((tx) => ({
 					...tx,
-					type: "transaction" as const,
+					itemType: "transaction" as const,
 				})),
 				...tokenTransfersData.items.map((transfer) => ({
 					...transfer,
-					type: "token_transfer" as const,
+					itemType: "token_transfer" as const,
 				})),
 			].sort(
 				(a, b) =>
@@ -117,7 +117,7 @@ export type Transaction = {
 	priority_fee: string | null;
 	base_fee_per_gas: string | null;
 	from: AddressInfo;
-	token_transfers: Array<{
+	token_transfers?: Array<{
 		block_hash: string;
 		from: AddressInfo;
 		log_index: number;
@@ -158,6 +158,7 @@ export type Transaction = {
 	max_priority_fee_per_gas: string | null;
 	revert_reason: string | null;
 	raw_input: string;
+	transaction_hash: string;
 };
 
 export type TokenTransfer = {

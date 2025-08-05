@@ -15,8 +15,8 @@ interface BalanceDisplayProps {
 	isLoading: boolean;
 	address: string;
 	transactions: ReadonlyArray<
-		| (Transaction & { type: "transaction" })
-		| (TokenTransfer & { type: "token_transfer" })
+		| (Transaction & { itemType: "transaction" })
+		| (TokenTransfer & { itemType: "token_transfer" })
 	>;
 }
 
