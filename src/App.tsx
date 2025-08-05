@@ -3,6 +3,8 @@ import { Button } from "./components/ui/button";
 import { BalanceDisplay } from "./components/balance-display";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useReadBalances } from "./hooks/useReadBalances";
+import { useAddressTransactions } from "./hooks/useBlockscoutApi";
+import type { Transaction, TokenTransfer } from "./hooks/useBlockscoutApi";
 
 function App() {
 	const account = useAccount();
@@ -15,6 +17,16 @@ function App() {
 		address: account.address,
 		chainId: 84532,
 	});
+
+	const { data: transactionsData } = useAddressTransactions({
+		address: account.address,
+	});
+
+	// Type-safe transaction items
+	const transactions = (transactionsData?.items || []) as ReadonlyArray<
+		| (Transaction & { type: "transaction" })
+		| (TokenTransfer & { type: "token_transfer" })
+	>;
 
 	const { connectors, connect } = useConnect();
 	const connector = connectors.find(
@@ -38,6 +50,7 @@ function App() {
 						</div>
 						<div className="w-full">
 							<BalanceDisplay
+								transactions={transactions}
 								balances={balnaceData || []}
 								isLoading={isLoading || isPending}
 								address={account.address}

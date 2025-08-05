@@ -14,7 +14,7 @@
 - [x] Total Balance
 - [x] Copy Address
 - [x] Asset Breakdown
-- [ ] Send Assets
+- [x] Send Assets
 - [ ] Swap Assets
-- [ ] Transaction History
+- [x] Transaction History
 - [ ] Onramp?
