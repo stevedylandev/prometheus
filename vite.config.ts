@@ -11,7 +11,4 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./src"),
 		},
 	},
-	server: {
-		allowedHosts: ["steves-macbook-pro.dachshund-deneb.ts.net"],
-	},
 });
